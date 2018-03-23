@@ -1,0 +1,4 @@
+- hosts: '{{ myhosts }}'
+  remote_user: '{{ myuser }}'
+  roles:
+  - { role: prometheus_exporter }

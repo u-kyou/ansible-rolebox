@@ -1,0 +1,37 @@
+# 安装exporter
+- name: stat {{ exporter_name }}
+  stat: path=/usr/local/bin/{{ exporter_name }}
+  register: exporter_file
+- name: copy {{ exporter_name }}
+  when: not exporter_file.stat.exists
+  copy: src=./{{ exporter_name }} dest=/usr/local/bin/{{ exporter_name }} mode=755
+  become: true
+
+# 配置exporter自启动
+- name: mkdir /var/log/{{ exporter_name }}
+  file:
+    path: /var/log/{{ exporter_name }}
+    state: directory
+    mode: 0755
+  become: true
+- name: set supervisord config for {{ exporter_name }}
+  ini_file:
+    dest: /etc/supervisord.conf
+    section: "program:{{ exporter_name }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - {option: 'command', value: "/usr/local/bin/{{ exporter_name }} {{ option_params }}"}
+    - {option: 'autorestart', value: 'true'}
+    - {option: 'user', value: 'root'}
+    - {option: 'stdout_logfile', value: "/var/log/{{ exporter_name }}/run.log"}
+    - {option: 'stdout_logfile_maxbytes', value: '1MB'}
+    - {option: 'stderr_logfile', value: "/var/log/{{ exporter_name }}/error.log"}
+    - {option: 'stderr_logfile_maxbytes', value: '1MB'}
+  become: true
+
+- name: restart supervisor
+  service: name=supervisord state=restarted enabled=yes
+  become: true
+
+
