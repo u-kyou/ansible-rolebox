@@ -1,13 +1,16 @@
+## 依赖说明
 由于通过supervisor来管理exporter的运行和自启动，所以本角色依赖supervisor角色，即meta/main.yml中指定了依赖关系，在安装exporter之前会自动先安装supervisor。
 
 
+## 变量说明
 本playbook包含变量，除了myhosts和myuser之外，还有：
-
-exporter_name 指定exporter名，本角色目前支持：consul_exporter,haproxy_exporter,memcached_exporter,node_exporter四个exporter
+exporter_name 指定exporter名
+> 本角色目前支持：consul_exporter,haproxy_exporter,memcached_exporter,node_exporter四个exporter
 
 option_params 指定运行参数
 
-option_params变量写法说明：
+
+### option_params变量写法：
 
 1) haproxy_exporter
 
@@ -33,7 +36,8 @@ option_params='--web.listen-address=:19100'
 
 说明：指定metrics端口为19100
 
-执行示例
+
+## 执行示例
 
 1) haproxy_exporter
 
