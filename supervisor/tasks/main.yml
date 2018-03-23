@@ -1,0 +1,46 @@
+# 确保supervisor已存在；不存在则安装
+- name: install supervisor
+  yum:
+    name: supervisor
+    state: present
+  become: true
+- name: stat supervisor config
+  stat: path=/etc/supervisord.conf
+  register: supervisor_config
+- name: config supervisor
+  when: not supervisor_config.stat.exists
+  copy:
+    content: |
+        [supervisord]
+        http_port=/var/tmp/supervisor.sock ; (default is to run a UNIX domain socket server)
+        logfile=/var/log/supervisor/supervisord.log ; (main log file;default $CWD/supervisord.log)
+        logfile_maxbytes=50MB      ; (max main logfile bytes b4 rotation;default 50MB)
+        logfile_backups=10          ; (num of main logfile rotation backups;default 10)
+        loglevel=info              ; (logging level;default info; others: debug,warn)
+        pidfile=/var/run/supervisord.pid ; (supervisord pidfile;default supervisord.pid)
+        nodaemon=false              ; (start in foreground if true;default false)
+        minfds=1024                ; (min. avail startup file descriptors;default 1024)
+        minprocs=200                ; (min. avail process descriptors;default 200)
+        
+        [supervisorctl]
+        serverurl=unix:///var/tmp/supervisor.sock ; use a unix:// URL  for a unix socket
+        
+        [include]
+        files = /etc/supervisord.d/*.ini
+    dest: /etc/supervisord.conf
+    mode: 644
+  become: true
+- name: config supervisor [include]
+  ini_file:
+    dest: /etc/supervisord.conf
+    section: include
+    option: files
+    value: /etc/supervisord.d/*.ini
+    backup: yes
+  become: true
+
+- name: restart supervisor
+  service: name=supervisord state=restarted enabled=yes
+  become: true
+
+
