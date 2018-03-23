@@ -1,4 +1,4 @@
 - hosts: '{{ myhosts }}'
-  remote_user: admin
+  remote_user: '{{ myuser }}'
   roles:
   - { role: supervisor }
